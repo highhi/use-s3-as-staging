@@ -11,18 +11,45 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - restore_cache:
+          key:
+            - v1-dependencies-{{ checksum "yarn.lock" }}
+            - v1-dependencies-
+      - run: yarn install
+      - save_cache:
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - ./*
+
+  lint:
+    <<: &defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run: yarn link
 
   deploy-s3:
     <<: *defaults
     steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: 'awscli install'
+          command: sudo apt-get -y -qq install awscli
+      - run:
+          name: 'nuxt build'
+          command: 'yarn build'
       - run:
           name: 'deploy to s3'
           command: |
-            sudo apt-get -y -qq install awscli
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               ls .
               echo "deploy to S3"
-              aws s3 sync ~/repo s3://${S3_BUCKET_NAME} --delete
+              aws s3 sync ~/repo/dist s3://${S3_BUCKET_NAME} --delete
             fi
 
 workflows:
