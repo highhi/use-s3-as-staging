@@ -21,7 +21,7 @@ jobs:
             sudo apt-get -y -qq install awscli
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               echo "deploy to S3"
-              aws s3 sync ~/repo s3://${S3_BUCKET_NAME}
+              aws s3 sync ~/repo s3://${S3_BUCKET_NAME}/foo --delete
             fi
 
 workflows:
