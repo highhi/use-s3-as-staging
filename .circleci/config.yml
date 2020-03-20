@@ -15,12 +15,13 @@ jobs:
   deploy-s3:
     <<: *default
     steps:
-      - run: 
-          command: |
-            sudo apt-get -y -qq install awscli
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              aws s3 sync ~/repo s3://${S3_BUCKET_NAME} --delete
-            fi
+      - run:
+        name: 'deploy to s3'
+        command: |
+          sudo apt-get -y -qq install awscli
+          if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            aws s3 sync ~/repo s3://${S3_BUCKET_NAME} --delete
+           fi
 
 workflows:
   deploy:
