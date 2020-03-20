@@ -1,5 +1,5 @@
 version: 2.1
-default: &default
+defaults: &defaults
   docker:
     - image: circleci/node:12.16.1
       environment:
@@ -8,12 +8,12 @@ default: &default
 
 jobs:
   setup:
-    <<: *default
+    <<: *defaults
     steps:
       - checkout
 
   deploy-s3:
-    <<: *default
+    <<: *defaults
     steps:
       - run:
         name: 'deploy to s3'
@@ -21,7 +21,7 @@ jobs:
           sudo apt-get -y -qq install awscli
           if [ "${CIRCLE_BRANCH}" == "master" ]; then
             aws s3 sync ~/repo s3://${S3_BUCKET_NAME} --delete
-           fi
+          fi
 
 workflows:
   deploy:
