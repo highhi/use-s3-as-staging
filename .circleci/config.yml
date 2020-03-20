@@ -22,6 +22,6 @@ workflows:
   deploy:
     jobs:
       - setup
-      - deploy-s3
+      - deploy-s3:
         requires:
           - setup
