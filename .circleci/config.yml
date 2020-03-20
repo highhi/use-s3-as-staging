@@ -7,8 +7,8 @@ defaults: &defaults
   working_directory: ~/repo
 
 jobs:
+  <<: *defaults
   setup:
-    <<: *defaults
     steps:
       - checkout
       - restore_cache:
@@ -26,7 +26,7 @@ jobs:
             - ./*
 
   lint:
-    <<: &defaults
+    <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
