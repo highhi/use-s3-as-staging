@@ -7,8 +7,8 @@ defaults: &defaults
   working_directory: ~/repo
 
 jobs:
-  <<: *defaults
   setup:
+    <<: *defaults
     steps:
       - checkout
       - restore_cache:
@@ -24,13 +24,6 @@ jobs:
           root: ~/repo
           paths:
             - ./*
-
-  lint:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/repo
-      - run: yarn link
 
   deploy-s3:
     <<: *defaults
