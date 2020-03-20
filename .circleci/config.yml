@@ -4,10 +4,13 @@ default: &default
 
 jobs:
   setup:
-    - checkout
+    <<: *default
+    steps:
+      - checkout
 
   deploy-s3:
     <<: *default
+    steps:
       - run: 
           command: |
             sudo apt-get -y -qq install awscli
