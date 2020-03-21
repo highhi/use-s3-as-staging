@@ -35,9 +35,6 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run:
-          name: 'awscli install'
-          command: sudo apt-get -y -qq install awscli
-      - run:
           name: 'set pr number'
           command: |
             if [[ $CIRCLE_PULL_REQUEST =~ ([0-9]+)$ ]]; then
