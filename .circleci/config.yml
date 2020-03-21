@@ -16,6 +16,10 @@ jobs:
             - v1-dependencies-{{ checksum "yarn.lock" }}
             - v1-dependencies-
       - run: yarn install
+      - run:
+          name: 'check pr number'
+          command: |
+            echo CIRCLE_PR_NUMBER
       - save_cache:
           key: v1-dependencies-{{ checksum "yarn.lock" }}
           paths:
@@ -49,6 +53,6 @@ workflows:
   deploy:
     jobs:
       - setup
-      - deploy-s3:
-          requires:
-            - setup
+      # - deploy-s3:
+      #     requires:
+      #       - setup
