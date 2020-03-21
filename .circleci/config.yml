@@ -18,7 +18,7 @@ jobs:
       - run: yarn install
       - run:
           name: 'check pr number'
-          command: echo ${CIRCLE_PR_NUMBER}
+          command: echo ${CIRCLE_PULL_REQUEST}
       - save_cache:
           key: v1-dependencies-{{ checksum "yarn.lock" }}
           paths:
