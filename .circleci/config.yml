@@ -16,9 +16,6 @@ jobs:
             - v1-dependencies-{{ checksum "yarn.lock" }}
             - v1-dependencies-
       - run: yarn install
-      - run:
-          name: 'check pr number'
-          command: echo ${CIRCLE_PULL_REQUEST}
       - save_cache:
           key: v1-dependencies-{{ checksum "yarn.lock" }}
           paths:
@@ -37,21 +34,27 @@ jobs:
           name: 'awscli install'
           command: sudo apt-get -y -qq install awscli
       - run:
+          name: 'set pr number'
+          command:
+            if [[ $CIRCLE_PULL_REQUESTS =~ ([0-9]+)$ ]]; then
+              echo "export PR_NUMBER=${BASH_REMATCH[1]}" >> $BASH_ENV
+            fi
+            source $BASH_ENV
+      - run:
           name: 'nuxt build'
           command: 'yarn build'
       - run:
           name: 'deploy to s3'
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ls .
-              echo "deploy to S3"
-              aws s3 sync ~/repo/dist s3://${S3_BUCKET_NAME} --delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"
-            fi
+            aws s3 sync ~/repo/dist s3://${S3_BUCKET_NAME}/${PR_NUMBER} --delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"
 
 workflows:
   deploy:
     jobs:
       - setup
-      # - deploy-s3:
-      #     requires:
-      #       - setup
+      - deploy-s3:
+          requires:
+            - setup
+          filters:
+            branches:
+              ignore: master
