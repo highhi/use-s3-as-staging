@@ -35,7 +35,7 @@ jobs:
           command: sudo apt-get -y -qq install awscli
       - run:
           name: 'set pr number'
-          command:
+          command: |
             if [[ $CIRCLE_PULL_REQUEST =~ ([0-9]+)$ ]]; then
               echo "export PR_NUMBER=${BASH_REMATCH[1]}" >> $BASH_ENV
             fi
