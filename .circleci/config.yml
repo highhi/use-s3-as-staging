@@ -1,4 +1,8 @@
 version: 2.1
+
+orbs:
+  aws-s3: circleci/aws-s3@1.0.15
+
 defaults: &defaults
   docker:
     - image: circleci/node:12.16.1
@@ -43,10 +47,10 @@ jobs:
       - run:
           name: 'nuxt build'
           command: 'yarn build'
-      - run:
-          name: 'deploy to s3'
-          command: |
-            aws s3 sync ~/repo/dist s3://${S3_BUCKET_NAME}/${PR_NUMBER} --delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"
+      - aws-s3/sync:
+          arguments: '--delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"'
+          from: ~/repo/dist
+          to: s3://${S3_BUCKET_NAME}/${PR_NUMBER} 
 
 workflows:
   deploy:
