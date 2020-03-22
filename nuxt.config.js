@@ -58,5 +58,9 @@ export default {
      ** You can extend webpack config here
      */
     extend(config, ctx) {}
+  },
+
+  router: {
+    base: process.env.PR_NUMBER ? `/${process.env.PR_NUMBER}/` : undefined
   }
 }
