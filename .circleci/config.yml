@@ -24,6 +24,9 @@ jobs:
           key: v1-dependencies-{{ checksum "yarn.lock" }}
           paths:
             - node_modules
+      - run:
+          name: 'nuxt build'
+          command: 'yarn build'
       - persist_to_workspace:
           root: ~/repo
           paths:
@@ -41,19 +44,33 @@ jobs:
               echo "export PR_NUMBER=${BASH_REMATCH[1]}" >> $BASH_ENV
             fi
             source $BASH_ENV
-      - run:
-          name: 'nuxt build'
-          command: 'yarn build'
       - aws-s3/sync:
           arguments: '--delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"'
           from: ~/repo/dist
           to: 's3://${S3_BUCKET_NAME}/${PR_NUMBER}'
+
+  hold-deploy-s3:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - aws-s3/sync:
+          arguments: '--delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"'
+          from: ~/repo/dist
+          to: 's3://${S3_BUCKET_NAME}/current'
 
 workflows:
   deploy:
     jobs:
       - setup
       - deploy-s3:
+          requires:
+            - setup
+          filters:
+            branches:
+              ignore: master
+      - hold-deploy-s3:
+          type: approval
           requires:
             - setup
           filters:
