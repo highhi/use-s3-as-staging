@@ -24,9 +24,7 @@ jobs:
           key: v1-dependencies-{{ checksum "yarn.lock" }}
           paths:
             - node_modules
-      - run:
-          name: 'nuxt build'
-          command: 'yarn build'
+      
       - persist_to_workspace:
           root: ~/repo
           paths:
@@ -38,22 +36,33 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run:
-          name: 'set pr number'
+          name: 'set BASE_URL'
           command: |
             if [[ $CIRCLE_PULL_REQUEST =~ ([0-9]+)$ ]]; then
-              echo "export PR_NUMBER=${BASH_REMATCH[1]}" >> $BASH_ENV
+              echo "export BASE_URL=${BASH_REMATCH[1]}" >> $BASH_ENV
             fi
             source $BASH_ENV
+      - run:
+          name: 'nuxt build'
+          command: 'yarn build'
       - aws-s3/sync:
           arguments: '--delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"'
           from: ~/repo/dist
-          to: 's3://${S3_BUCKET_NAME}/${PR_NUMBER}'
+          to: 's3://${S3_BUCKET_NAME}/${BASE_URL}'
 
   deploy-s3-current-dir:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
+      - run:
+          name: 'set BASE_URL'
+          command: |
+            echo "export BASE_URL=current" >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: 'nuxt build'
+          command: 'yarn build'
       - aws-s3/sync:
           arguments: '--delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"'
           from: ~/repo/dist

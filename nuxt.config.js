@@ -61,6 +61,6 @@ export default {
   },
 
   router: {
-    base: process.env.PR_NUMBER ? `/${process.env.PR_NUMBER}/` : undefined
+    base: process.env.BASE_URL ? `/${process.env.BASE_URL}/` : undefined
   }
 }
