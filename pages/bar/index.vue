@@ -1,3 +1,3 @@
 <template>
-  <p>bar</p>
+  <p>boo</p>
 </template>
