@@ -32,7 +32,7 @@ jobs:
           paths:
             - ./*
 
-  deploy-s3:
+  deploy-s3-number-dir:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -49,7 +49,7 @@ jobs:
           from: ~/repo/dist
           to: 's3://${S3_BUCKET_NAME}/${PR_NUMBER}'
 
-  hold-deploy-s3:
+  deploy-s3-current-dir:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -63,16 +63,19 @@ workflows:
   deploy:
     jobs:
       - setup
-      - deploy-s3:
+      - deploy-s3-number-dir:
           requires:
             - setup
           filters:
             branches:
               ignore: master
-      - hold-deploy-s3:
+      - hold-deploy-s3-current-dir:
           type: approval
           requires:
             - setup
           filters:
             branches:
               ignore: master
+      - deploy-s3-current-dir:
+          requires:
+            - hold-deploy-s3-current-dir
