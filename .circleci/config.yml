@@ -65,7 +65,7 @@ jobs:
       - aws-s3/sync:
           arguments: '--delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"'
           from: ~/repo/dist
-          to: 's3://${S3_BUCKET_NAME}/current'
+          to: 's3://higghi-staging-sample-2/current'
 
 workflows:
   deploy:
