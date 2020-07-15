@@ -29,16 +29,16 @@ jobs:
           paths:
             - ./*
 
-  deploy-s3:
+  deploy-s3-preview:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
       - run:
-          name: 'set pr number'
+          name: 'set BASE_URL'
           command: |
             if [[ $CIRCLE_PULL_REQUEST =~ ([0-9]+)$ ]]; then
-              echo "export PR_NUMBER=${BASH_REMATCH[1]}" >> $BASH_ENV
+              echo "export BASE_URL=${BASH_REMATCH[1]}" >> $BASH_ENV
             fi
             source $BASH_ENV
       - run:
@@ -47,15 +47,42 @@ jobs:
       - aws-s3/sync:
           arguments: '--delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"'
           from: ~/repo/dist
-          to: 's3://${S3_BUCKET_NAME}/${PR_NUMBER}'
+          to: 's3://${S3_BUCKET_NAME}/${BASE_URL}'
+
+  deploy-s3-staging:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: 'set BASE_URL'
+          command: |
+            echo "export BASE_URL=current" >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: 'nuxt build'
+          command: 'yarn build'
+      - aws-s3/sync:
+          arguments: '--delete --exclude ".gitkeep" --exclude ".nojekyll" --exclude "*.map"'
+          from: ~/repo/dist
+          to: 's3://higghi-staging-sample-2/current'
 
 workflows:
   deploy:
     jobs:
       - setup
-      - deploy-s3:
+      - deploy-s3-preview:
           requires:
             - setup
           filters:
             branches:
-              ignore: master
+              ignore:
+                - master
+                - /staging-.*/ 
+      - deploy-s3-staging:
+          requires:
+            - setup
+          filters:
+            branches:
+              only:
+                - /staging-.*/
